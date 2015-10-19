@@ -195,6 +195,7 @@ public class ClevelandWinNotifier
 		}
 		
 		// If Cleveland won, and the in game timestamp is after the last victory, update the DB!
+		// Otherwise, just update DB to set in game status to false.
 		if (cleScore > oppScore && 
 			teamStatusEntity.getInGameLastUpdated()
 							.isAfter(teamStatusEntity.getLastVictory())) {
@@ -203,6 +204,9 @@ public class ClevelandWinNotifier
 			teamStatusEntity.setInGame(false);
 			db.save(teamStatusEntity);
 			return TeamStatus.WIN;
+		} else {
+			teamStatusEntity.setInGame(false);
+			db.save(teamStatusEntity);
 		}
 		return TeamStatus.NO_OP;
 	}
