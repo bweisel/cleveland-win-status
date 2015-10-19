@@ -203,10 +203,12 @@ public class ClevelandWinNotifier
 			teamStatusEntity.setLastVictory(LocalDateTime.now());
 			teamStatusEntity.setInGame(false);
 			db.save(teamStatusEntity);
+			logger.log("Cleveland won!");
 			return TeamStatus.WIN;
 		} else {
 			teamStatusEntity.setInGame(false);
 			db.save(teamStatusEntity);
+			logger.log("Cleveland lost! :(");
 		}
 		return TeamStatus.NO_OP;
 	}
