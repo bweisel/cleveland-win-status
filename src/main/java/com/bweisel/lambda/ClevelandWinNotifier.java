@@ -127,14 +127,19 @@ public class ClevelandWinNotifier
 	 * 		Cleveland 33 Baltimore 30 (00:00 IN OT)
 	 */
 	protected TeamStatus updateClevelandTeamStatus(Optional<String> scoreLine, TeamStatusEntity teamStatusEntity) {
-		// No Cleveland team in the bottomline result
+		final String teamName = teamStatusEntity.getTeamName().toUpperCase();
+		
+		// Check if there was no Cleveland team in the bottomline result
 		if (!scoreLine.isPresent()) {
+			logger.log("No game status result found for " + teamName);
 			return TeamStatus.NO_OP;
 		}
 		
 		// If the last win date is within the last 10 minutes return WIN!
-		if (LocalDateTime.now().minusMinutes(10)
+		if (LocalDateTime.now()
+						 .minusMinutes(10)
 						 .isBefore(teamStatusEntity.getLastVictory())) {
+			logger.log(teamName + " won in the last 10 minutes!");
 			return TeamStatus.WIN;
 		}
 
@@ -150,7 +155,7 @@ public class ClevelandWinNotifier
 		// If so, update the in game timestamp
 		Matcher progressMatcher = inProgressPattern.matcher(timeLeft);
 		if(progressMatcher.find()) {
-			logger.log("Game in progress.");
+			logger.log(teamName + " game in progress.");
 			teamStatusEntity.setInGame(true);
 			teamStatusEntity.setInGameLastUpdated(LocalDateTime.now());
 			db.save(teamStatusEntity);
@@ -161,7 +166,7 @@ public class ClevelandWinNotifier
 		// If so, just return NO OP
 		Matcher upcomingMatcher = upcomingPattern.matcher(timeLeft);
 		if (upcomingMatcher.find()) {
-			logger.log("Game upcoming.");
+			logger.log(teamName + " game upcoming.");
 			return TeamStatus.NO_OP;
 		}
 
@@ -203,12 +208,12 @@ public class ClevelandWinNotifier
 			teamStatusEntity.setLastVictory(LocalDateTime.now());
 			teamStatusEntity.setInGame(false);
 			db.save(teamStatusEntity);
-			logger.log("Cleveland won!");
+			logger.log(teamName + " JUST won!!!");
 			return TeamStatus.WIN;
 		} else {
 			teamStatusEntity.setInGame(false);
 			db.save(teamStatusEntity);
-			logger.log("Cleveland lost! :(");
+			logger.log(teamName + " game over. Loss, or win is past the alert time.");
 		}
 		return TeamStatus.NO_OP;
 	}
